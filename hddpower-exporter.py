@@ -9,8 +9,8 @@ import time
 from prometheus_client import Counter, Gauge, start_http_server
 
 
-error_count_metric = Counter('hddpower_errors', 'The number of errors encountered while attempting to gather information from the probes', ['dev'])
-hdd_power_state = Gauge('hdd_power_state', 'The battery level of the probe', ['dev', 'state'])
+error_count_metric = Counter('hddpower_errors', 'The number of errors encountered while attempting to gather information from devices', ['dev'])
+hdd_power_state = Gauge('hddpower_state', 'The device power state', ['dev', 'state'])
 
 
 def disk_power_state(blockdev):
