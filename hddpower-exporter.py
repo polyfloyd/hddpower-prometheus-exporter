@@ -10,7 +10,7 @@ from prometheus_client import Counter, Gauge, start_http_server
 
 
 error_count_metric = Counter('hddpower_errors', 'The number of errors encountered while attempting to gather information from devices', ['dev'])
-hdd_power_state = Gauge('hddpower_state', 'The device power state', ['dev', 'state'])
+hdd_power_state = Gauge('hddpower_state', 'The device power state (0=standby, 1=active/idle, 2=idle, 3=NVcache_spindown, 4=NVcache_spinup)', ['dev'])
 
 
 def disk_power_state(blockdev):
@@ -35,7 +35,7 @@ def main():
     logging.info('started prometheus exporter on port %d', args.port)
 
     # From hdparm.c
-    states = {"standby", "NVcache_spindown", "NVcache_spinup", "idle", "active/idle"}
+    states = {'standby': 0, 'active/idle': 1, 'idle': 2, 'NVcache_spindown': 3, 'NVcache_spinup': 4}
     devices = args.dev
 
     while True:
@@ -46,9 +46,7 @@ def main():
                 error_count_metric.labels(dev=dev).inc()
                 logging.error('could not query device %s: %s', dev, err)
                 continue
-            states.add(current_state)
-            for state in states:
-                hdd_power_state.labels(dev=dev, state=state).set(1 if state == current_state else 0)
+            hdd_power_state.labels(dev=dev).set(states[current_state])
         time.sleep(10)
 
 
